@@ -16,9 +16,7 @@ end
 
 
 # sigmoidal activation function
-function sigm(a::Vector{Float64})
-    1. ./ (1. + exp(-a))
-end
+sigm(a::Vector{Float64}) = 1. ./ (1. + exp(-a))
 
 # sigmoid derivative
 function sigm_derv(a::Vector{Float64})
@@ -29,17 +27,18 @@ end
 function NeuralLayer(in_dim::Integer,out_dim::Integer)
     # Glorot & Bengio, 2010
     b = sqrt(6) / sqrt(in_dim + out_dim)
-    NeuralLayer(2b * rand(out_dim,in_dim) - b,
-                zeros(out_dim),
-                sigm,
-                sigm_derv,
+    NeuralLayer(
+        2b * rand(out_dim,in_dim) - b,
+        zeros(out_dim),
+        sigm,
+        sigm_derv,
 
-                zeros(in_dim),
-                zeros(out_dim),
-                zeros(out_dim),
+        zeros(in_dim),
+        zeros(out_dim),
+        zeros(out_dim),
 
-                zeros(out_dim,in_dim),
-                zeros(out_dim)
+        zeros(out_dim,in_dim),
+        zeros(out_dim)
     )
 end
 
@@ -50,16 +49,18 @@ type ArtificialNeuralNetwork
 end
 
 function softmax(ann_output::Vector{Float64})
-    # Takes the output of a neural network and produces a valid 
+    # Takes the output of a neural network and produces a valid
     # probability distribution
     ann_output = exp(ann_output)
     ann_output / sum(ann_output)
 end
 
 function ArtificialNeuralNetwork(n_hidden_units::Integer)
-    ann = ArtificialNeuralNetwork(Array(NeuralLayer,0),
-                                 [n_hidden_units],
-                                 Array(Int64,0))
+    ann = ArtificialNeuralNetwork(
+        Array(NeuralLayer,0),
+        [n_hidden_units],
+        Array(Int64,0)
+    )
 end
 
 function forward_propagate(nl::NeuralLayer,x::Vector{Float64})
@@ -74,9 +75,11 @@ function back_propagate(nl::NeuralLayer,output_gradient::Vector{Float64})
     nl.w' * output_gradient # return gradient of level below
 end
 
-function init!(ann::ArtificialNeuralNetwork,
-                     x::Matrix{Float64},
-                     y::Vector{Int64})
+function init!(
+        ann::ArtificialNeuralNetwork,
+        x::Matrix{Float64},
+        y::Vector{Int64}
+    )
     layers = Array(NeuralLayer,length(ann.hidden_sizes) + 1)
     ann.classes = unique(y)
     sort!(ann.classes)
@@ -92,12 +95,14 @@ function init!(ann::ArtificialNeuralNetwork,
     ann
 end
 
-function fit!(ann::ArtificialNeuralNetwork,
-              x::Matrix{Float64},
-              y::Vector{Int64};
-              epochs::Int64 = 5,
-              alpha::Float64 = 0.1,
-              lambda::Float64 = 0.1)
+function fit!(
+        ann::ArtificialNeuralNetwork,
+        x::Matrix{Float64},
+        y::Vector{Int64};
+        epochs::Int64 = 5,
+        alpha::Float64 = 0.1,
+        lambda::Float64 = 0.1
+    )
     init!(ann,x,y)
     n_obs, n_feats = size(x)
     layers = ann.layers
